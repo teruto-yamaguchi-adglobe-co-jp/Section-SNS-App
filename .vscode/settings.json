@@ -1,0 +1,22 @@
+{
+    "dart.flutterSdkPath": "",
+    "dart.debugExternalPackageLibraries": true,
+    "dart.debugSdkLibraries": false,
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+        80
+    ],
+    "files.associations": {
+        "*.dart": "dart"
+    },
+    "flutter.emulatorAutoSelect": true,
+    "[dart]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.selectionHighlight": false,
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "editor.suggestSelection": "first",
+        "editor.tabCompletion": "onlySnippets",
+        "editor.wordBasedSuggestions": "off"
+    }
+}
