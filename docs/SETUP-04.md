@@ -11,6 +11,7 @@
 5. [パッケージのインストール](#パッケージのインストール)
 6. [動作確認](#動作確認)
 7. [トラブルシューティング](#トラブルシューティング)
+8. [リアルタイム機能の設定](#リアルタイム機能の設定)
 
 ---
 
@@ -330,6 +331,105 @@ flutter run
 
 ---
 
+## リアルタイム機能の設定
+
+Supabaseのリアルタイム機能を使うと、データベースの変更が即座にアプリに反映されます。複数のデバイスでアプリを開いている場合、一方で変更すると他方にも自動的に反映されます。
+
+### 1. Replicationの有効化
+
+Supabaseダッシュボードでリアルタイム機能を有効にします:
+
+1. Supabaseダッシュボードにログイン
+2. 左サイドバーの「Database」をクリック
+3. 「Replication」タブを選択
+4. `counters` テーブルを探し、トグルスイッチをONにする
+
+または、SQL Editorで以下を実行:
+
+```sql
+-- countersテーブルのリアルタイムを有効化
+alter publication supabase_realtime add table counters;
+```
+
+### 2. コードの実装
+
+`lib/main.dart` に既にリアルタイムサブスクリプションが実装されています:
+
+```dart
+class _MyHomePageState extends State<MyHomePage> {
+  RealtimeChannel? _realtimeChannel;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounter();
+    _setupRealtimeSubscription();
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
+  }
+
+  // リアルタイムサブスクリプションのセットアップ
+  void _setupRealtimeSubscription() {
+    _realtimeChannel = supabase
+        .channel('counters_channel')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'counters',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id',
+            value: 1,
+          ),
+          callback: (payload) {
+            if (mounted) {
+              setState(() {
+                _counter = payload.newRecord['value'] as int;
+              });
+            }
+          },
+        )
+        .subscribe();
+  }
+}
+```
+
+### 3. リアルタイム機能の確認
+
+1. **複数デバイスで起動**: Android EmulatorとChromeブラウザで同時にアプリを起動
+2. **一方でボタンを押す**: Android Emulatorでカウンターを増やす
+3. **他方を確認**: Chromeブラウザのカウンターが自動的に更新される
+4. **Supabaseから直接更新**: ダッシュボードのTable Editorから`value`を変更すると、両方のアプリが即座に更新される
+
+### トラブルシューティング (リアルタイム)
+
+#### リアルタイム更新が反映されない
+
+**原因1**: Replicationが有効化されていない
+
+**解決方法**:
+1. Supabaseダッシュボードで Database > Replication を確認
+2. `counters` テーブルのトグルがONになっているか確認
+3. または、`alter publication supabase_realtime add table counters;` を実行
+
+**原因2**: サブスクリプションがエラーになっている
+
+**解決方法**:
+1. アプリを完全に再起動（ホットリロードではなくホットリスタート）
+2. デバッグコンソールでエラーメッセージを確認
+
+**原因3**: RLSポリシーの問題
+
+**解決方法**:
+- RLSポリシーが正しく設定されているか確認
+- 開発環境では `ALTER TABLE counters DISABLE ROW LEVEL SECURITY;` を実行
+
+---
+
 ## 📝 実装の詳細
 
 ### コードの説明
@@ -431,8 +531,8 @@ Future<void> _incrementCounter() async {
 
 Supabaseの導入が完了したら、以下の機能を追加できます:
 
+- [x] リアルタイムデータ同期
 - [ ] ユーザー認証機能の実装
-- [ ] リアルタイムデータ同期
 - [ ] 複数ユーザー間でのカウンター共有
 - [ ] 画像アップロード機能（Supabase Storage）
 - [ ] プロフィール管理機能
