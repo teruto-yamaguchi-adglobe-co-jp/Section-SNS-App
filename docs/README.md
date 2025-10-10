@@ -70,6 +70,7 @@ SupabaseをFlutterアプリに導入し、カウンターデータをSupabaseの
 | **パッケージのインストール**      | supabase_flutterとflutter_dotenvの導入       |
 | **動作確認**                      | カウンター機能のテストとSupabaseでの確認     |
 | **トラブルシューティング**        | よくあるエラーと解決方法                     |
+| **リアルタイム機能の設定**        | Replicationの有効化と即時反映の実装          |
 
 ## 💡 Tips
 

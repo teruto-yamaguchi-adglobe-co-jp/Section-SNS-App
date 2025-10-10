@@ -72,11 +72,43 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   bool _isLoading = true;
+  RealtimeChannel? _realtimeChannel;
 
   @override
   void initState() {
     super.initState();
     _loadCounter();
+    _setupRealtimeSubscription();
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
+  }
+
+  // Setup realtime subscription to listen for database changes
+  void _setupRealtimeSubscription() {
+    _realtimeChannel = supabase
+        .channel('counters_channel')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'counters',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id',
+            value: 1,
+          ),
+          callback: (payload) {
+            if (mounted) {
+              setState(() {
+                _counter = payload.newRecord['value'] as int;
+              });
+            }
+          },
+        )
+        .subscribe();
   }
 
   // Load counter value from Supabase
@@ -103,9 +135,9 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading counter: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading counter: $e')));
       }
       setState(() {
         _isLoading = false;
@@ -122,15 +154,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     try {
-      await supabase
-          .from('counters')
-          .update({'value': newValue})
-          .eq('id', 1);
+      await supabase.from('counters').update({'value': newValue}).eq('id', 1);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving counter: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving counter: $e')));
       }
     }
   }
