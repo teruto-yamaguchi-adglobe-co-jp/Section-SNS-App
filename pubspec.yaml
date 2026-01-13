@@ -36,10 +36,11 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # Supabase client for Flutter
-  supabase_flutter: ^2.9.3
+  supabase_flutter: ^2.10.3
 
   # Environment variables
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
