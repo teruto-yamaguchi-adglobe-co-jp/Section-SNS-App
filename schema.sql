@@ -42,3 +42,26 @@ BEGIN
   WHERE id = post_id_param;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Enable RLS for the tables
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+
+-- Allow public access to posts
+CREATE POLICY "Allow public read access to posts" ON posts FOR SELECT USING (true);
+CREATE POLICY "Allow public insert access to posts" ON posts FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update access to posts" ON posts FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete access to posts" ON posts FOR DELETE USING (true);
+
+-- Allow public access to likes
+CREATE POLICY "Allow public read access to likes" ON likes FOR SELECT USING (true);
+CREATE POLICY "Allow public insert access to likes" ON likes FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update access to likes" ON likes FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete access to likes" ON likes FOR DELETE USING (true);
+
+-- Allow public access to comments
+CREATE POLICY "Allow public read access to comments" ON comments FOR SELECT USING (true);
+CREATE POLICY "Allow public insert access to comments" ON comments FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update access to comments" ON comments FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete access to comments" ON comments FOR DELETE USING (true);
